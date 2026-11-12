@@ -1,7 +1,16 @@
-const CACHE = 'pgtpcalc-static-v2';
-self.addEventListener('install', ev => ev.waitUntil(caches.open(CACHE).then(c => c.addAll(['./','./index.html','./config.js','./manifest.webmanifest','./lugia.png']))));
-self.addEventListener('activate', ev => ev.waitUntil(self.clients.claim()));
-self.addEventListener('fetch', ev => {
-  if(ev.request.method !== 'GET' || new URL(ev.request.url).origin !== self.location.origin) return;
-  ev.respondWith(fetch(ev.request).then(resp=>{const clone=resp.clone(); caches.open(CACHE).then(c=>c.put(ev.request,clone)); return resp;}).catch(()=>caches.match(ev.request)));
+const CACHE = 'pgtpcalc-static-v5';
+const FILES = ['./', './index.html', './config.js', './manifest.webmanifest'];
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));
+});
+self.addEventListener('activate', event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE && key.startsWith('pgtpcalc-')).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+});
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+  if(event.request.method !== 'GET' || url.origin !== self.location.origin) return;
+  event.respondWith(fetch(event.request).then(response => {
+    if (response.ok) { const copy = response.clone(); caches.open(CACHE).then(cache => cache.put(event.request, copy)); }
+    return response;
+  }).catch(() => caches.match(event.request)));
 });

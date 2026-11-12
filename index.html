@@ -1,303 +1,53 @@
-<!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<meta name="theme-color" content="#180d10"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<title>PG TP calc</title>
-<link rel="manifest" href="manifest.webmanifest"/>
-<link rel="icon" href="icon.svg" type="image/svg+xml"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"/>
-<style>
-:root{
-  color-scheme:dark;
-  --bg:#140b0d;
-  --bg2:#1b0f12;
-  --surface:#211215;
-  --surface-2:#29171a;
-  --surface-3:#311b1f;
-  --border:#563035;
-  --border-soft:#3f2327;
-  --accent:#cf4a51;
-  --accent-strong:#e35861;
-  --text:#f6f1f1;
-  --muted:#cebdbf;
-  --placeholder:#9b8589;
-  --shadow:0 12px 28px rgba(0,0,0,.28);
-}
+<!doctype html><html lang="ko"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#120e0f"/><meta name="apple-mobile-web-app-capable" content="yes"/><title>Pokémon GO Team Power Calculator</title><link rel="manifest" href="manifest.webmanifest"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"/><style>
+:root{color-scheme:dark;--bg:#120e0f;--panel:#1c1618;--field:#251d20;--border:#35292d;--text:#f0ebec;--muted:#a99da1;--accent:#b94c56}
 *{box-sizing:border-box;font-style:normal}
-html,body{height:100%}
-body{
-  margin:0;
-  background:linear-gradient(180deg,var(--bg) 0%,#12090b 100%);
-  color:var(--text);
-  font-family:"Pretendard",system-ui,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-  line-height:1.5;
-}
-button,input,select,textarea{font:inherit;font-style:normal}
-.header{
-  position:sticky;top:0;z-index:10;
-  background:rgba(20,11,13,.92);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border-soft);
-}
-.wrap{max-width:1200px;margin:0 auto;padding:18px 20px}
-.topbar{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(360px,.9fr);gap:18px;align-items:start}
-.brand{display:flex;align-items:flex-start;gap:14px}
-.logo{
-  width:56px;height:56px;flex:0 0 56px;
-  display:grid;place-items:center;
-  border-radius:16px;
-  background:linear-gradient(180deg,#2a1518,#1f1013);
-  border:1px solid var(--border);
-  box-shadow:var(--shadow);
-}
-.logo img{width:38px;height:38px;display:block}
-.title h1{margin:0;font-size:34px;line-height:1.05;font-weight:800;letter-spacing:-.03em}
-.title .sub{margin-top:6px;color:var(--muted);font-size:14px}
-.status{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:7px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--border-soft);font-size:12px;color:var(--muted)}
-.status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
-.notice{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:14px 16px;
-  box-shadow:var(--shadow);
-}
-.notice-title{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--muted)}
-.notice-body{font-size:13px;white-space:pre-line;color:var(--text)}
-.notice-body .dim{color:var(--muted)}
-.main{padding-top:18px;padding-bottom:40px}
-.section{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:22px;
-  padding:18px;
-  box-shadow:var(--shadow);
-}
-.section + .section{margin-top:16px}
-.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-.section-title{margin:0;font-size:20px;font-weight:800;letter-spacing:-.02em}
-.section-sub{font-size:12px;color:var(--muted)}
-.fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.field label{display:block;margin-bottom:7px;font-size:13px;font-weight:600;color:var(--muted)}
-input,select{
-  width:100%;
-  height:46px;
-  border-radius:14px;
-  border:1px solid var(--border-soft);
-  background:var(--surface-2);
-  color:var(--text);
-  padding:0 14px;
-  outline:none;
-  transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
-}
-input::placeholder{color:var(--placeholder)}
-select:invalid{color:var(--placeholder)}
-input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(207,74,81,.14)}
-.compare-row{display:grid;grid-template-columns:138px minmax(0,1fr) auto auto auto auto;gap:12px;align-items:end}
-.compare-label{
-  height:46px;display:flex;align-items:center;justify-content:center;
-  border-radius:14px;background:var(--surface-2);border:1px solid var(--border-soft);
-  font-weight:800;font-size:17px;letter-spacing:-.02em
-}
-.btns{display:flex;gap:10px;flex-wrap:wrap}
-button{
-  height:46px;padding:0 18px;border-radius:14px;border:1px solid var(--border-soft);
-  background:var(--surface-2);color:var(--text);cursor:pointer;font-weight:700;
-  transition:transform .04s ease, background .15s ease, border-color .15s ease;
-}
-button:hover{background:var(--surface-3);border-color:var(--border)}
-button:active{transform:translateY(1px)}
-button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-button.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong)}
-button.ghost{background:transparent}
-button:disabled{opacity:.55;cursor:wait}
-.table-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
-.toolbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.search{min-width:220px;max-width:280px}
-.table-wrap{overflow:auto;border-radius:18px;border:1px solid var(--border-soft)}
-.rank-table{width:100%;min-width:760px;border-collapse:collapse;table-layout:fixed;background:var(--surface-2)}
-.rank-table th,.rank-table td{padding:12px 10px;border-bottom:1px solid var(--border-soft);border-right:1px solid var(--border-soft);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rank-table th:last-child,.rank-table td:last-child{border-right:0}
-.rank-table thead th{position:sticky;top:0;background:#341d21;font-size:14px;font-weight:800;z-index:1}
-.rank-table tbody tr:nth-child(odd){background:#251518}
-.rank-table tbody tr:nth-child(even){background:#201214}
-.rank-table tbody tr:hover{background:#2a181c}
-.rank-table th:nth-child(1){width:8%}
-.rank-table th:nth-child(2){width:24%}
-.rank-table th:nth-child(3){width:20%}
-.rank-table th:nth-child(4){width:22%}
-.rank-table th:nth-child(5){width:12%}
-.rank-table th:nth-child(6){width:14%}
-.rank-table td:nth-child(1),.rank-table td:nth-child(5),.rank-table td:nth-child(6){font-variant-numeric:tabular-nums}
-.rank-table td:nth-child(1){font-weight:800;color:#ffd6d8}
-.rank-table td:nth-child(5){font-weight:800}
-.empty{padding:54px 20px;text-align:center;color:var(--muted);background:var(--surface-2)}
-.footer{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:16px;color:var(--muted);font-size:12px}
-.dialog-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.56);display:none;align-items:center;justify-content:center;padding:18px;z-index:20}
-.dialog-backdrop.show{display:flex}
-.dialog{width:min(760px,100%);max-height:min(84vh,920px);overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow)}
-.dialog-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border-soft)}
-.dialog-head h3{margin:0;font-size:20px}
-.dialog-body{padding:18px 20px;color:var(--text)}
-.dialog-body h4{margin:18px 0 8px;font-size:15px}
-.dialog-body ul,.dialog-body ol{margin:8px 0 0 20px;padding:0}
-.dialog-body li+li{margin-top:4px}
-.code{padding:2px 7px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border-soft);font-size:12px}
-@media (max-width:960px){
-  .topbar{grid-template-columns:1fr}
-  .fields{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .compare-row{grid-template-columns:1fr 1fr;align-items:stretch}
-  .compare-row .field{grid-column:span 2}
-  .compare-row .compare-label{grid-column:span 2;justify-content:flex-start;padding:0 14px}
-  .compare-row button{width:100%}
-}
-@media (max-width:640px){
-  .wrap{padding:14px}
-  .title h1{font-size:28px}
-  .section{padding:14px}
-  .fields{grid-template-columns:1fr}
-  .compare-row{grid-template-columns:1fr}
-  .compare-row .field,.compare-row .compare-label{grid-column:auto}
-  .table-toolbar{align-items:flex-start}
-  .toolbar-right{width:100%}
-  .search{min-width:0;max-width:none;width:100%}
-  .footer{align-items:flex-start}
-}
-</style>
-</head>
-<body>
-<header class="header">
-  <div class="wrap topbar">
-    <div class="brand">
-      <div class="logo"><img src="icon.svg" alt="파이어 아이콘"/></div>
-      <div class="title">
-        <h1>PG TP calc</h1>
-        <div class="sub">Pokémon GO Team Power Calculator</div>
-        <div class="status" id="status">연결 대기</div>
-      </div>
-    </div>
-    <aside class="notice" aria-label="안내문">
-      <p class="notice-title">안내</p>
-      <div class="notice-body">▶ 일부 미구현 개체 포함되어 있을 수 있습니다.
+body{margin:0;background:var(--bg);color:var(--text);font:400 14px/1.5 Pretendard,system-ui,-apple-system,sans-serif}
+button,input{font:inherit;font-style:normal}
+.wrap{max-width:1120px;margin:auto;padding:0 24px}
+header{border-bottom:1px solid var(--border)}
+.head{display:grid;grid-template-columns: minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:start;padding-top:26px;padding-bottom:25px}
+.brand h1{font-size:25px;letter-spacing:-.035em;font-weight:650;margin:0 0 8px;line-height:1.25}
+.status{font-size:12px;color:var(--muted)}
+.notice{font-size:12px;line-height:1.62;color:var(--muted);white-space:pre-line;margin:0}
+main{padding-top:24px!important;padding-bottom:40px!important}
+.panel{border:1px solid var(--border);background:var(--panel);border-radius:10px;padding:22px;margin-bottom:14px}
+h2{font-weight:650;font-size:16px;margin:0 0 18px;letter-spacing:-.02em}
+.fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 14px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}
+.combo{position:relative}.combo::after{content:'⌄';position:absolute;right:13px;top:8px;font-size:20px;font-weight:300;pointer-events:none;color:var(--muted)}
+input{background:var(--field);border:1px solid var(--border);color:var(--text);border-radius:6px;min-width:0;width:100%;height:41px;padding:0 31px 0 11px;outline:none}
+input:focus{border-color:var(--accent)}input::placeholder{color:#8e8286}
+.compare{display:flex;align-items:center;gap:12px}.compare label{font-size:13px;flex:0 0 67px}.compare .combo{flex:1;min-width:0}.actions{display:flex;gap:8px;flex-wrap:wrap}
+button{height:41px;padding:0 17px;border-radius:6px;border:1px solid var(--border);background:#282023;color:var(--text);cursor:pointer;white-space:nowrap;font-weight:550}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}button:disabled{opacity:.45;cursor:default}
+.title-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:13px} .title-row h2{margin:0}.title-row .meta{font-size:12px;color:var(--muted)}
+.search{max-width:180px;height:36px}
+.table-wrap{overflow:auto}.rank{width:100%;min-width:740px;border-collapse:collapse;table-layout:fixed}
+.rank th,.rank td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.rank thead{background:#2c2024}.rank th{font-weight:600;color:#ded4d7}
+.rank tbody tr:nth-child(2n){background:#20191c}.rank tbody tr:nth-child(2n+1){background:#1a1517}
+.rank th:nth-child(1){width:7%}.rank th:nth-child(2){width:24%}.rank th:nth-child(3){width:21%}.rank th:nth-child(4){width:24%}.rank th:nth-child(5){width:11%}.rank th:nth-child(6){width:13%}
+.rank td:nth-child(1),.rank td:nth-child(5){font-weight:600}.empty{padding:32px 12px!important;color:var(--muted)}
+.footer{font-size:11px;color:#776c70;padding:12px 0}
+@media(max-width:900px){.head{grid-template-columns:1fr;gap:16px}.fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.wrap{padding-left:14px;padding-right:14px}.head{padding-top:20px;padding-bottom:18px}.brand h1{font-size:22px}.panel{padding:14px}.fields{gap:12px}.compare{align-items:stretch;flex-wrap:wrap}.compare label{flex-basis:100%;padding-top:0}.compare .combo{flex-basis:100%}.actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.search{max-width:148px}}
+</style></head><body>
+<header><div class="wrap head"><div class="brand"><h1>Pokémon GO Team Power Calculator</h1><div id="status" class="status">연결 대기</div></div><p class="notice">▶ 일부 미구현 개체 포함되어 있을 수 있습니다.
 ▶ 개인 참고용 계산기로 Gamepress기반 DPS 계산과는 차이가 있을 수 있습니다.
-<span class="dim">- 1차징 스킬 패널티 미적용
-- 피해를 입어 얻은 에너지 및 실신으로 낭비되는 에너지 미반영</span>
-※ 특히 유리대포(레지드래고/그림자라이코 등) 티어는 타 자료와의 차이에 유의하세요.</div>
-    </aside>
-  </div>
-</header>
-
-<main class="wrap main">
-  <section class="section">
-    <div class="section-head">
-      <h2 class="section-title">계산조건</h2>
-      <div class="section-sub">모든 계산조건은 초기값이 공란입니다.</div>
-    </div>
-    <div class="fields">
-      <div class="field"><label for="boss">레이드 보스</label><select id="boss" required></select></div>
-      <div class="field"><label for="weather">날씨</label><select id="weather" required></select></div>
-      <div class="field"><label for="mega">진화(원시/메가)</label><select id="mega" required></select></div>
-      <div class="field"><label for="friend">우정 보너스</label><select id="friend" required></select></div>
-      <div class="field"><label for="sword">거수참</label><select id="sword" required></select></div>
-      <div class="field"><label for="team">팀 인원</label><select id="team" required></select></div>
-      <div class="field"><label for="max">슈퍼맥스</label><select id="max" required></select></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="compare-row">
-      <div class="compare-label">비교대상</div>
-      <div class="field"><label for="maxPokemon" style="position:absolute;left:-9999px">비교대상</label><select id="maxPokemon" required></select></div>
-      <button id="calculate" class="primary" disabled>계산</button>
-      <button id="reset">초기화</button>
-      <button id="reload">새로고침</button>
-      <button id="guideBtn" class="ghost">설명서</button>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="table-toolbar">
-      <div>
-        <h2 class="section-title" style="margin:0">공격 DPS 순위</h2>
-        <div class="section-sub" id="count">TOP 20</div>
-      </div>
-      <div class="toolbar-right">
-        <input id="search" class="search" type="search" placeholder="포켓몬 검색" aria-label="포켓몬 검색"/>
-      </div>
-    </div>
-    <div class="table-wrap">
-      <table class="rank-table" aria-label="공격 DPS 순위 표">
-        <thead>
-          <tr>
-            <th scope="col">순위</th>
-            <th scope="col">개체</th>
-            <th scope="col">노말스킬</th>
-            <th scope="col">스페셜스킬</th>
-            <th scope="col">DPS</th>
-            <th scope="col">비교</th>
-          </tr>
-        </thead>
-        <tbody id="results">
-          <tr><td colspan="6" class="empty">계산 데이터를 불러오는 중입니다.</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="footer">
-      <div>한 화면에서 한 행씩 순위를 확인할 수 있도록 원본 시트 형식을 유지한 표입니다.</div>
-      <button id="guideBtnBottom">설명서</button>
-    </div>
-  </section>
-</main>
-
-<div class="dialog-backdrop" id="guideModal" aria-hidden="true">
-  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
-    <div class="dialog-head">
-      <h3 id="guideTitle">설명서</h3>
-      <button id="closeGuide">닫기</button>
-    </div>
-    <div class="dialog-body">
-      <h4>앱 사용 방법</h4>
-      <ol>
-        <li><strong>계산조건</strong>에서 레이드 보스, 날씨, 진화(원시/메가), 우정 보너스, 거수참, 팀 인원, 슈퍼맥스 조건을 모두 선택합니다.</li>
-        <li><strong>비교대상</strong> 포켓몬을 선택합니다. 비교 열의 수치는 선택한 포켓몬 DPS를 100% 기준으로 환산한 상대값입니다.</li>
-        <li><strong>계산</strong> 버튼을 누르면 상위 20개 DPS가 표 형식으로 표시됩니다.</li>
-        <li><strong>초기화</strong> 버튼을 누르면 조건과 검색어가 모두 공란으로 돌아갑니다.</li>
-      </ol>
-
-      <h4>배포/설치 개요</h4>
-      <ul>
-        <li>이 앱은 <strong>PWA</strong> 방식입니다. 웹주소로 접속한 뒤 휴대폰 홈 화면에 추가하면 앱처럼 실행됩니다.</li>
-        <li>관리자는 구글시트의 Apps Script를 웹앱으로 배포한 뒤 <span class="code">config.js</span>에 <span class="code">/exec</span> 주소를 입력해야 합니다.</li>
-        <li>일반 사용자는 공유받은 주소만 열면 되고, 각자 독립적으로 계산합니다.</li>
-      </ul>
-
-      <h4>주의사항</h4>
-      <ul>
-        <li>일부 미구현 개체가 포함되어 있을 수 있습니다.</li>
-        <li>Gamepress 기반 DPS 계산과 차이가 있을 수 있습니다.</li>
-        <li>1차징 스킬 패널티, 피해를 입어 얻은 에너지, 실신으로 낭비되는 에너지는 반영하지 않습니다.</li>
-      </ul>
-
-      <h4>함께 들어있는 파일</h4>
-      <ul>
-        <li><span class="code">index.html</span> : 앱 본체</li>
-        <li><span class="code">config.js</span> : Apps Script 배포 URL 설정</li>
-        <li><span class="code">Code.gs</span> : 구글시트 데이터 API</li>
-        <li><span class="code">README_설치방법.md</span> : 상세 설치 설명서</li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<script src="config.js"></script>
-<script>
+   - 1차징 스킬 패널티 미적용
+   - 피해를 입어 얻은 에너지 및 실신으로 낭비되는 에너지 미반영
+※ 특히 유리대포(레지드래고/그림자라이코 등) 티어는 타 자료와의 차이에 유의하세요.</p></div></header>
+<main class="wrap">
+<section class="panel"><h2>계산조건</h2><div class="fields"><div class="field"><label for="boss">레이드 보스</label><div class="combo"><input id="boss" list="boss-options" autocomplete="off" placeholder="선택 또는 입력"/><datalist id="boss-options"></datalist></div></div><div class="field"><label for="weather">날씨</label><div class="combo"><input id="weather" list="weather-options" autocomplete="off" placeholder="선택 또는 입력"/><datalist id="weather-options"></datalist></div></div><div class="field"><label for="mega">진화(원시/메가)</label><div class="combo"><input id="mega" list="mega-options" autocomplete="off" placeholder="선택 또는 입력"/><datalist id="mega-options"></datalist></div></div><div class="field"><label for="friend">우정 보너스</label><div class="combo"><input id="friend" list="friend-options" autocomplete="off" placeholder="선택 또는 입력"/><datalist id="friend-options"></datalist></div></div><div class="field"><label for="sword">거수참</label><div class="combo"><input id="sword" list="sword-options" autocomplete="off" placeholder="선택 또는 입력"/><datalist id="sword-options"></datalist></div></div><div class="field"><label for="team">팀 인원</label><div class="combo"><input id="team" list="team-options" autocomplete="off" placeholder="선택 또는 입력"/><datalist id="team-options"></datalist></div></div><div class="field"><label for="max">슈퍼맥스</label><div class="combo"><input id="max" list="max-options" autocomplete="off" placeholder="선택 또는 입력"/><datalist id="max-options"></datalist></div></div></div></section>
+<section class="panel"><div class="compare"><label for="maxPokemon">비교대상</label><div class="combo"><input id="maxPokemon" list="maxPokemon-options" placeholder="선택 또는 입력 (선택사항)" autocomplete="off"/><datalist id="maxPokemon-options"></datalist></div><div class="actions"><button id="reset">초기화</button><button id="calculate" class="primary" disabled>계산</button></div></div></section>
+<section class="panel"><div class="title-row"><div><h2>공격 DPS 순위</h2><span id="count" class="meta">TOP 20</span></div><input id="search" type="search" class="search" placeholder="검색" aria-label="포켓몬 검색"/></div><div class="table-wrap"><table class="rank"><thead><tr><th>순위</th><th>개체</th><th>노말스킬</th><th>스페셜스킬</th><th>DPS</th><th>비교</th></tr></thead><tbody id="results"><tr><td class="empty" colspan="6">데이터 연결 중</td></tr></tbody></table></div></section>
+<div class="footer">비공식 참고용 계산기 · 데이터 새로고침은 페이지 새로고침으로 가능합니다.</div>
+</main><script src="config.js"></script><script>
 'use strict';
 const $ = id => document.getElementById(id);
-const ids = ['boss','weather','mega','friend','sword','team','max','maxPokemon'];
+const ids = ['boss','weather','mega','friend','sword','team','max'];
+const allIds = [...ids,'maxPokemon'];
+const allowed = new Map();
 let data, ranks=[], loadBusy=false;
 const n = x => { if (typeof x==='number') return x; if(x==null || x==='')return NaN;const t=String(x).replace(/[(),\s]/g,'');return Number(t);};
 const lookupTable=(table,key,column)=>{
@@ -308,23 +58,23 @@ const lookupTable=(table,key,column)=>{
 };
 const dedup = arr => Array.from(new Set(arr.map(String).filter(Boolean)));
 function populate(id,options){
- const e=$(id);e.replaceChildren();
- const empty=document.createElement('option');empty.value='';empty.textContent='선택';empty.selected=true;empty.disabled=false;e.append(empty);
- for(const val of dedup(options)){const op=document.createElement('option');op.value=val;op.textContent=val;e.append(op);}e.value='';
+ const items=dedup(options), list=$(id+'-options');
+ allowed.set(id,new Set(items));
+ list.replaceChildren();
+ for(const val of items){const op=document.createElement('option');op.value=val;list.append(op);}
+ $(id).value='';
 }
 function initOptions(){
- const bossNames=dedup(data.bosses);
- const mons=dedup(data.pokemon.map(p=>p[0]));
- populate('boss',bossNames);
+ populate('boss',data.bosses);
  populate('weather',data.weather.slice(1).map(r=>r[0]));
  populate('mega',data.mega.slice(1).map(r=>r[0]));
  populate('friend',['베프','일반']);
  populate('sword',['거수참','일반']);
- populate('team',[1,2,3,4,5]);
+ populate('team',[1,2,3,4]);
  populate('max',['슈퍼맥스','하이레벨']);
- populate('maxPokemon',mons);
+ populate('maxPokemon',data.pokemon.map(p=>p[0]));
  $('calculate').disabled=false;
- clearResults('계산조건을 모두 선택한 뒤 계산 버튼을 눌러 주세요.');
+ clearResults('계산조건을 선택해 주세요.');
 }
 function computeRow(p,boss,settings,movesByName,bossByName,cpByLevel) {
  const name=String(p[0]), type1=String(p[1]||''),type2=String(p[2]||'');
@@ -359,16 +109,22 @@ function computeRow(p,boss,settings,movesByName,bossByName,cpByLevel) {
 }
 function calculate(){
  if(!data)return;
- const settings=Object.fromEntries(ids.map(id=>[id,$(id).value]));
- if(ids.some(id=>!settings[id])){clearResults('모든 계산조건과 비교대상을 선택해 주세요.');$('status').textContent='조건 선택 필요';return;}
+ const settings=Object.fromEntries(allIds.map(id=>[id,$(id).value.trim()]));
+ const missing=ids.filter(id=>!settings[id]);
+ const invalid=allIds.filter(id=>settings[id] && !allowed.get(id)?.has(settings[id]));
+ if(missing.length || invalid.length){
+   clearResults(invalid.length?'목록에 있는 값을 선택하거나 정확히 입력해 주세요.':'계산조건을 모두 선택해 주세요.');
+   $('status').textContent=invalid.length?'입력값 확인 필요':'조건 선택 필요';
+   $(invalid[0]||missing[0]).focus();return;
+ }
  const bossByName=new Map(data.raidBosses.map(row=>[String(row[0]),row]));
  const movesByName=new Map(data.moves.map(row=>[String(row[0]),row]));
  const cpByLevel=new Map(data.cp.map(row=>[String(n(row[0])),n(row[1])]));
  const list=[];let skipped=0;
  for(const row of data.pokemon){const val=computeRow(row,settings.boss,settings,movesByName,bossByName,cpByLevel); if(val&&Number.isFinite(val.dps))list.push(val);else skipped++;}
- const reference=list.find(x=>x.name===settings.maxPokemon);
+ const reference=settings.maxPokemon?list.find(x=>x.name===settings.maxPokemon):null;
  const base=reference?.dps||NaN;
- ranks=list.sort((a,b)=>b.dps-a.dps).slice(0,20).map(x=>({...x,relative:Number.isFinite(base)?100*x.dps/base:NaN}));
+ ranks=list.sort((a,b)=>b.dps-a.dps).slice(0,20).map(x=>({...x,relative:Number.isFinite(base)&&base>0?100*x.dps/base:NaN}));
  $('status').textContent='계산 완료';
  render();
  if(skipped)console.warn('계산값 확인 필요:',skipped,'개 포켓몬 조합');
@@ -380,7 +136,7 @@ function clearResults(message){
 function render(){
  const q=$('search').value.trim().toLowerCase();
  const rows=ranks.filter(x=>(x.name+' '+x.fast+' '+x.charged).toLowerCase().includes(q));
- $('count').textContent='TOP 20 · '+rows.length+'개 표시';
+ $('count').textContent=rows.length+' / 20';
  const root=$('results');root.replaceChildren();
  if(!rows.length){const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=6;td.className='empty';td.textContent='검색 결과가 없습니다.';tr.append(td);root.append(tr);return;}
  for(const x of rows){
@@ -399,21 +155,12 @@ function load(){
  script.onerror=()=>finish(new Error('API 연결 실패: 배포 권한 또는 URL을 확인하세요.'));
  script.src=url+(url.includes('?')?'&':'?')+'callback='+encodeURIComponent(cb)+'&_='+Date.now();document.head.append(script);
 }
-function resetAll(){for(const id of ids)$(id).value='';$('search').value='';clearResults('계산조건을 모두 선택한 뒤 계산 버튼을 눌러 주세요.');$('status').textContent='조건 선택 대기';}
-function openGuide(){ $('guideModal').classList.add('show'); $('guideModal').setAttribute('aria-hidden','false'); }
-function closeGuide(){ $('guideModal').classList.remove('show'); $('guideModal').setAttribute('aria-hidden','true'); }
+function resetAll(){for(const id of allIds)$(id).value='';$('search').value='';clearResults('계산조건을 모두 선택한 뒤 계산 버튼을 눌러 주세요.');$('status').textContent='조건 선택 대기';}
 $('calculate').addEventListener('click',calculate);
-$('reload').addEventListener('click',load);
+
 $('search').addEventListener('input',render);
 $('reset').addEventListener('click',resetAll);
-$('guideBtn').addEventListener('click',openGuide);
-$('guideBtnBottom').addEventListener('click',openGuide);
-$('closeGuide').addEventListener('click',closeGuide);
-$('guideModal').addEventListener('click',e=>{ if(e.target=== $('guideModal')) closeGuide(); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeGuide(); });
-for(const id of ids)$(id).addEventListener('change',()=>{$('status').textContent='조건 변경됨';clearResults('계산 버튼을 누르면 결과가 표시됩니다.');});
+for(const id of allIds)$(id).addEventListener('change',()=>{$('status').textContent='조건 변경됨';clearResults('계산 버튼을 누르면 결과가 표시됩니다.');});
 if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
 load();
-</script>
-</body>
-</html>
+</script></body></html>
