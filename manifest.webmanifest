@@ -1,0 +1,19 @@
+{
+  "id": "./",
+  "name": "PG TP calc — 포켓몬 GO 팀파워계산기",
+  "short_name": "PG TP calc",
+  "description": "포켓몬 GO 레이드 팀파워·DPS 독립 계산기",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#140b0d",
+  "theme_color": "#140b0d",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
