@@ -1,4 +1,4 @@
-const CACHE = 'pgtpcalc-static-v5';
+const CACHE = 'pgtpcalc-static-v6';
 const FILES = ['./', './index.html', './config.js', './manifest.webmanifest'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));
