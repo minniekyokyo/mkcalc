@@ -93,7 +93,7 @@ function computeRow(p,boss,settings,movesByName,bossByName,cpByLevel) {
  if(!Number.isFinite(fpower*cpower*fenergy*cenergy*ftime*ctime*atk*defense) || fenergy<=0 || cenergy<=0 || ftime<=0 || ctime<=0)return null;
  const fastN=cenergy/fenergy, period=fastN*ftime+ctime;
  const shadow=name.includes('그림자')?1.2:1;
- const common=shadow*(settings.sword==='거수참'?1.2:1)*(settings.friend==='베프'?1.1:1);
+ const common=shadow*(settings.sword==='거수참'?1.1:1)*(settings.friend==='베프'?1.1:1);
  const teamCount=Number(settings.team);
  const maxFast=teamCount>1?360/(20*(teamCount-1)):Infinity;
  const teamBuff=teamCount>1?Math.min(fastN,maxFast)/maxFast:0;
