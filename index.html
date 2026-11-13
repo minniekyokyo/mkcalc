@@ -7,7 +7,7 @@ button,input,select{font:inherit;font-style:normal}
 header{border-bottom:1px solid var(--border)}
 .head{display:grid;grid-template-columns: minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:start;padding-top:26px;padding-bottom:25px}
 .brand h1{font-size:25px;letter-spacing:-.035em;font-weight:650;margin:0 0 8px;line-height:1.25}
-.status{font-size:12px;color:var(--muted)}
+.status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .notice{font-size:12px;line-height:1.62;color:var(--muted);white-space:pre-line;margin:0}
 main{padding-top:24px!important;padding-bottom:40px!important}
 .panel{border:1px solid var(--border);background:var(--panel);border-radius:10px;padding:22px;margin-bottom:14px}
@@ -32,7 +32,7 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff}bu
 @media(max-width:900px){.head{grid-template-columns:1fr;gap:16px}.fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.rank th,.rank td{padding:10px 5px;font-size:12px}.rank th:nth-child(1){width:12%}.rank th:nth-child(2){width:50%}.rank th:nth-child(3){width:19%}.rank th:nth-child(4){width:19%}.rank td:nth-child(2){padding-left:8px}.pokemon-name{font-size:12px}.pokemon-moves{font-size:10px}.wrap{padding-left:14px;padding-right:14px}.head{padding-top:20px;padding-bottom:18px}.brand h1{font-size:22px}.panel{padding:14px}.fields{gap:12px}.compare{align-items:stretch;flex-wrap:wrap}.compare label{flex-basis:100%;padding-top:0}.compare .combo{flex-basis:100%}.actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.search{max-width:148px}}
 </style></head><body>
-<header><div class="wrap head"><div class="brand"><h1>팀파워계산기</h1><div id="status" class="status">연결 대기</div></div><p class="notice">▶ 일부 미구현 개체 포함되어 있을 수 있습니다.
+<header><div class="wrap head"><div class="brand"><h1>팀파워계산기</h1><span id="status" class="status" role="status" aria-live="polite">연결 대기</span></div><p class="notice">▶ 일부 미구현 개체 포함되어 있을 수 있습니다.
 ▶ 개인 참고용 계산기로 Gamepress기반 DPS 계산과는 차이가 있을 수 있습니다.
    - 1차징 스킬 패널티 미적용
    - 피해를 입어 얻은 에너지 및 실신으로 낭비되는 에너지 미반영
@@ -47,6 +47,10 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff}bu
 const $ = id => document.getElementById(id);
 const ids = ['boss','weather','mega','friend','sword','team','max'];
 const allIds = [...ids,'maxPokemon'];
+const DEFAULTS = Object.freeze({weather:'날씨없음',mega:'메진없음',friend:'일반',sword:'일반',max:'슈퍼맥스'});
+function applyDefaults(){
+ for(const id of allIds){const select=$(id);const value=DEFAULTS[id] || '';select.value=[...select.options].some(option=>option.value===value)?value:'';}
+}
 let data, ranks=[], loadBusy=false;
 const n = x => { if (typeof x==='number') return x; if(x==null || x==='')return NaN;const t=String(x).replace(/[(),\s]/g,'');return Number(t);};
 const lookupTable=(table,key,column)=>{
@@ -55,6 +59,7 @@ const lookupTable=(table,key,column)=>{
  const row=table.slice(1).find(r=>String(r[0])===String(key));
  return row?n(row[idx]):NaN;
 };
+const moveKey = value => String(value ?? '').trim().toLocaleLowerCase('en-US');
 const dedup = arr => Array.from(new Set(arr.map(String).filter(Boolean)));
 function populate(id,options){
  const items=dedup(options), select=$(id);
@@ -72,13 +77,14 @@ function initOptions(){
  populate('team',[1,2,3,4]);
  populate('max',['슈퍼맥스','하이레벨']);
  populate('maxPokemon',data.pokemon.map(p=>p[0]));
+ applyDefaults();
  $('calculate').disabled=false;
- clearResults('계산조건을 선택해 주세요.');
+ clearResults('레이드 보스와 팀 인원을 선택한 뒤 계산 버튼을 눌러 주세요.');
 }
 function computeRow(p,boss,settings,movesByName,bossByName,cpByLevel) {
  const name=String(p[0]), type1=String(p[1]||''),type2=String(p[2]||'');
  const level=n(p[3]),attack=n(p[4]),fast=String(p[9]||''),fastType=String(p[10]||''),charged=String(p[14]||''),chargedType=String(p[15]||'');
- const moveF=movesByName.get(fast),moveC=movesByName.get(charged);
+ const moveF=movesByName.get(moveKey(fast)),moveC=movesByName.get(moveKey(charged));
  const fpower=moveF?n(moveF[1]):NaN, fenergy=moveF?n(moveF[2]):NaN, ftime=moveF?n(moveF[3]):NaN;
  const cpower=(moveC?n(moveC[1]):NaN) * (p[19]===1 || String(p[19])==='1' ? (settings.max==='슈퍼맥스'?1.3:1.2):1);
  const cenergy=moveC?Math.abs(n(moveC[2])):NaN,ctime=moveC?n(moveC[3]):NaN;
@@ -116,27 +122,37 @@ function calculate(){
    $(missing[0]).focus();return;
  }
  const bossByName=new Map(data.raidBosses.map(row=>[String(row[0]),row]));
- const movesByName=new Map(data.moves.map(row=>[String(row[0]),row]));
+ const movesByName=new Map();
+ // Google Sheets MATCH는 대소문자를 구분하지 않고 첫 번째 일치 행을 사용합니다.
+ for(const row of data.moves){
+   const key=moveKey(row[0]);
+   if(key && !movesByName.has(key)) movesByName.set(key,row);
+ }
  const cpByLevel=new Map(data.cp.map(row=>[String(n(row[0])),n(row[1])]));
  const list=[];let skipped=0;
- for(const row of data.pokemon){const val=computeRow(row,settings.boss,settings,movesByName,bossByName,cpByLevel); if(val&&Number.isFinite(val.dps))list.push(val);else skipped++;}
+ const missingNames=[];
+ for(const row of data.pokemon){
+   const val=computeRow(row,settings.boss,settings,movesByName,bossByName,cpByLevel);
+   if(val&&Number.isFinite(val.dps)) list.push(val);
+   else {skipped++;missingNames.push(String(row[0]));}
+ }
  const reference=settings.maxPokemon?list.find(x=>x.name===settings.maxPokemon):null;
  const base=reference?.dps||NaN;
  ranks=list.sort((a,b)=>b.dps-a.dps).slice(0,20).map(x=>({...x,relative:Number.isFinite(base)&&base>0?100*x.dps/base:NaN}));
  $('status').textContent='계산 완료';
  render();
- if(skipped)console.warn('계산값 확인 필요:',skipped,'개 포켓몬 조합');
+ if(skipped)console.warn('계산 불가 조합('+skipped+'개):',missingNames.join(', '));
 }
 function clearResults(message){
  ranks=[];$('count').textContent='TOP 20';const root=$('results');root.replaceChildren();
- const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=6;td.className='empty';td.textContent=message;tr.append(td);root.append(tr);
+ const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=4;td.className='empty';td.textContent=message;tr.append(td);root.append(tr);
 }
 function render(){
  const q=$('search').value.trim().toLowerCase();
  const rows=ranks.filter(x=>(x.name+' '+x.fast+' '+x.charged).toLowerCase().includes(q));
  $('count').textContent=rows.length+' / 20';
  const root=$('results');root.replaceChildren();
- if(!rows.length){const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=6;td.className='empty';td.textContent='검색 결과가 없습니다.';tr.append(td);root.append(tr);return;}
+ if(!rows.length){const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=4;td.className='empty';td.textContent='검색 결과가 없습니다.';tr.append(td);root.append(tr);return;}
  for(const x of rows){
    const tr=document.createElement('tr');
    const rank=document.createElement('td');rank.textContent=String(ranks.indexOf(x)+1);tr.append(rank);
@@ -159,7 +175,7 @@ function load(){
  script.onerror=()=>finish(new Error('API 연결 실패: 배포 권한 또는 URL을 확인하세요.'));
  script.src=url+(url.includes('?')?'&':'?')+'callback='+encodeURIComponent(cb)+'&_='+Date.now();document.head.append(script);
 }
-function resetAll(){for(const id of allIds)$(id).value='';$('search').value='';clearResults('계산조건을 모두 선택한 뒤 계산 버튼을 눌러 주세요.');$('status').textContent='조건 선택 대기';}
+function resetAll(){applyDefaults();$('search').value='';clearResults('레이드 보스와 팀 인원을 선택한 뒤 계산 버튼을 눌러 주세요.');$('status').textContent='조건 선택 대기';}
 $('calculate').addEventListener('click',calculate);
 
 $('search').addEventListener('input',render);
